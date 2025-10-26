@@ -2,138 +2,102 @@ package com.safety.model;
 
 import jakarta.persistence.*;
 import lombok.*;
-
-
-import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
-
+import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "alerts")
-
+@Data
 public class Alert {
-@Id
-@GeneratedValue(strategy = GenerationType.IDENTITY)
-private Long alertId;
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-@ManyToOne(fetch = FetchType.EAGER)
-@JoinColumn(name = "user_id")
-private User user;
+    @ManyToOne
+    private User user;
 
+    private String message;
 
-private String message;
-private Double latitude;
-private Double longitude;
-private boolean active = true;
-private Instant createdAt = Instant.now();
+    private double latitude;
+    private double longitude;
 
+    private LocalDateTime timestamp;
 
-@OneToMany(mappedBy = "alert", cascade = CascadeType.ALL, orphanRemoval = true)
-private List<AlertLocation> locations = new ArrayList<>();
+    private boolean resolved = false;
 
+	public Long getId() {
+		return id;
+	}
 
-public Long getAlertId() {
-	return alertId;
-}
+	public void setId(Long id) {
+		this.id = id;
+	}
 
+	public User getUser() {
+		return user;
+	}
 
-public void setAlertId(Long alertId) {
-	this.alertId = alertId;
-}
+	public void setUser(User user) {
+		this.user = user;
+	}
 
+	public String getMessage() {
+		return message;
+	}
 
-public User getUser() {
-	return user;
-}
+	public void setMessage(String message) {
+		this.message = message;
+	}
 
+	public double getLatitude() {
+		return latitude;
+	}
 
-public void setUser(User user) {
-	this.user = user;
-}
+	public void setLatitude(double latitude) {
+		this.latitude = latitude;
+	}
 
+	public double getLongitude() {
+		return longitude;
+	}
 
-public String getMessage() {
-	return message;
-}
+	public void setLongitude(double longitude) {
+		this.longitude = longitude;
+	}
 
+	public LocalDateTime getTimestamp() {
+		return timestamp;
+	}
 
-public void setMessage(String message) {
-	this.message = message;
-}
+	public void setTimestamp(LocalDateTime timestamp) {
+		this.timestamp = timestamp;
+	}
 
+	public boolean isResolved() {
+		return resolved;
+	}
 
-public Double getLatitude() {
-	return latitude;
-}
+	public void setResolved(boolean resolved) {
+		this.resolved = resolved;
+	}
 
+	public Alert(Long id, User user, String message, double latitude, double longitude, LocalDateTime timestamp,
+			boolean resolved) {
+		super();
+		this.id = id;
+		this.user = user;
+		this.message = message;
+		this.latitude = latitude;
+		this.longitude = longitude;
+		this.timestamp = timestamp;
+		this.resolved = resolved;
+	}
 
-public void setLatitude(Double latitude) {
-	this.latitude = latitude;
-}
-
-
-public Double getLongitude() {
-	return longitude;
-}
-
-
-public void setLongitude(Double longitude) {
-	this.longitude = longitude;
-}
-
-
-public boolean isActive() {
-	return active;
-}
-
-
-public void setActive(boolean active) {
-	this.active = active;
-}
-
-
-public Instant getCreatedAt() {
-	return createdAt;
-}
-
-
-public void setCreatedAt(Instant createdAt) {
-	this.createdAt = createdAt;
-}
-
-
-public List<AlertLocation> getLocations() {
-	return locations;
-}
-
-
-public void setLocations(List<AlertLocation> locations) {
-	this.locations = locations;
-}
-
-
-public Alert(Long alertId, User user, String message, Double latitude, Double longitude, boolean active,
-		Instant createdAt, List<AlertLocation> locations) {
-	super();
-	this.alertId = alertId;
-	this.user = user;
-	this.message = message;
-	this.latitude = latitude;
-	this.longitude = longitude;
-	this.active = active;
-	this.createdAt = createdAt;
-	this.locations = locations;
-}
-
-
-public Alert() {
-	super();
-	// TODO Auto-generated constructor stub
-}
-
-
-
-
+	public Alert() {
+		super();
+		// TODO Auto-generated constructor stub
+	}
+    
+    
+    
+	
 }
