@@ -2,7 +2,6 @@ package com.safety.controller;
 
 import com.safety.model.Alert;
 import com.safety.service.AlertService;
-import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,29 +16,18 @@ public class AlertController {
     private AlertService alertService;
 
     @PostMapping("/sos")
-    public ResponseEntity<Alert> sendAlert(@RequestBody AlertRequest alertRequest) {
-        Alert alert = alertService.createAlert(
-            alertRequest.userId, alertRequest.message, alertRequest.latitude, alertRequest.longitude);
-        return ResponseEntity.ok(alert);
+    public ResponseEntity<Alert> sendSOS(@RequestBody Alert alert){
+        return ResponseEntity.ok(alertService.createAlert(alert));
     }
 
     @GetMapping("/police")
-    public ResponseEntity<List<Alert>> getActiveAlerts() {
-        List<Alert> alerts = alertService.getActiveAlerts();
-        return ResponseEntity.ok(alerts);
+    public ResponseEntity<List<Alert>> getActiveAlerts(){
+        return ResponseEntity.ok(alertService.getActiveAlerts());
     }
 
     @PutMapping("/resolve/{id}")
-    public ResponseEntity<String> resolveAlert(@PathVariable Long id) {
+    public ResponseEntity<String> resolveAlert(@PathVariable Long id){
         alertService.resolveAlert(id);
         return ResponseEntity.ok("Alert resolved");
     }
-}
-
-@Data
-class AlertRequest {
-    public Long userId;
-    public String message;
-    public double latitude;
-    public double longitude;
 }
