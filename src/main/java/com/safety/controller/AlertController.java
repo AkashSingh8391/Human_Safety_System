@@ -1,33 +1,59 @@
 package com.safety.controller;
 
 import com.safety.model.Alert;
-import com.safety.service.AlertService;
+import com.safety.repository.AlertRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/alert")
 public class AlertController {
 
     @Autowired
-    private AlertService alertService;
+    private AlertRepository alertRepo;
 
+    // Civil sends SOS
     @PostMapping("/sos")
-    public ResponseEntity<Alert> sendSOS(@RequestBody Alert alert){
-        return ResponseEntity.ok(alertService.createAlert(alert));
+    public Alert sendSos(@RequestBody Alert alert) {
+        alert.setTimestamp(Instant.now());
+        alert.setResolved(false);
+        return alertRepo.save(alert);
     }
 
-    @GetMapping("/police")
-    public ResponseEntity<List<Alert>> getActiveAlerts(){
-        return ResponseEntity.ok(alertService.getActiveAlerts());
+    // Police gets all active alerts
+    @GetMapping("/active")
+    public List<Alert> activeAlerts() {
+        return alertRepo.findByResolvedFalse();
+    }
+
+    // Get last location for an alert (for track)
+    @GetMapping("/track/{alertId}")
+    public Optional<Alert> track(@PathVariable Long alertId) {
+        return alertRepo.findById(alertId);
     }
 
     @PutMapping("/resolve/{id}")
-    public ResponseEntity<String> resolveAlert(@PathVariable Long id){
-        alertService.resolveAlert(id);
-        return ResponseEntity.ok("Alert resolved");
+    public String resolve(@PathVariable Long id) {
+        Optional<Alert> opt = alertRepo.findById(id);
+        if (opt.isPresent()) {
+            Alert a = opt.get();
+            a.setResolved(true);
+            alertRepo.save(a);
+            return "Resolved";
+        } else return "NotFound";
+    }
+
+    // For demo: save new coordinate for existing alert (simulate movement)
+    @PostMapping("/update/{alertId}")
+    public Alert updateLocation(@PathVariable Long alertId, @RequestBody Alert partial) {
+        Alert a = alertRepo.findById(alertId).orElseThrow();
+        a.setLatitude(partial.getLatitude());
+        a.setLongitude(partial.getLongitude());
+        a.setTimestamp(Instant.now());
+        return alertRepo.save(a);
     }
 }
