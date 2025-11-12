@@ -1,103 +1,97 @@
 package com.safety.model;
 
 import jakarta.persistence.*;
-import lombok.*;
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 @Entity
-@Data
+@Table(name = "alerts")
 public class Alert {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long alertId;
 
-    @ManyToOne
-    private User user;
-
+    private Long userId;
     private String message;
-
     private double latitude;
     private double longitude;
-
-    private LocalDateTime timestamp;
-
+    private Instant timestamp;
     private boolean resolved = false;
 
-	public Long getId() {
-		return id;
-	}
+    // 1. Default (No-Args) Constructor
+    // Replaces @NoArgsConstructor
+    public Alert() {
+    }
 
-	public void setId(Long id) {
-		this.id = id;
-	}
+    // 2. All-Arguments Constructor
+    // Replaces @AllArgsConstructor
+    public Alert(Long alertId, Long userId, String message, double latitude, double longitude, Instant timestamp, boolean resolved) {
+        this.alertId = alertId;
+        this.userId = userId;
+        this.message = message;
+        this.latitude = latitude;
+        this.longitude = longitude;
+        this.timestamp = timestamp;
+        this.resolved = resolved;
+    }
 
-	public User getUser() {
-		return user;
-	}
+    // 3. Getter Methods
+    // Replaces the "getters" part of @Data
+    public Long getAlertId() {
+        return alertId;
+    }
 
-	public void setUser(User user) {
-		this.user = user;
-	}
+    public Long getUserId() {
+        return userId;
+    }
 
-	public String getMessage() {
-		return message;
-	}
+    public String getMessage() {
+        return message;
+    }
 
-	public void setMessage(String message) {
-		this.message = message;
-	}
+    public double getLatitude() {
+        return latitude;
+    }
 
-	public double getLatitude() {
-		return latitude;
-	}
+    public double getLongitude() {
+        return longitude;
+    }
 
-	public void setLatitude(double latitude) {
-		this.latitude = latitude;
-	}
+    public Instant getTimestamp() {
+        return timestamp;
+    }
 
-	public double getLongitude() {
-		return longitude;
-	}
+    // Note: For a boolean field named 'resolved', the getter is typically 'isResolved()'
+    public boolean isResolved() {
+        return resolved;
+    }
 
-	public void setLongitude(double longitude) {
-		this.longitude = longitude;
-	}
+    // 4. Setter Methods
+    // Replaces the "setters" part of @Data
+    public void setAlertId(Long alertId) {
+        this.alertId = alertId;
+    }
 
-	public LocalDateTime getTimestamp() {
-		return timestamp;
-	}
+    public void setUserId(Long userId) {
+        this.userId = userId;
+    }
 
-	public void setTimestamp(LocalDateTime timestamp) {
-		this.timestamp = timestamp;
-	}
+    public void setMessage(String message) {
+        this.message = message;
+    }
 
-	public boolean isResolved() {
-		return resolved;
-	}
+    public void setLatitude(double latitude) {
+        this.latitude = latitude;
+    }
 
-	public void setResolved(boolean resolved) {
-		this.resolved = resolved;
-	}
+    public void setLongitude(double longitude) {
+        this.longitude = longitude;
+    }
 
-	public Alert(Long id, User user, String message, double latitude, double longitude, LocalDateTime timestamp,
-			boolean resolved) {
-		super();
-		this.id = id;
-		this.user = user;
-		this.message = message;
-		this.latitude = latitude;
-		this.longitude = longitude;
-		this.timestamp = timestamp;
-		this.resolved = resolved;
-	}
+    public void setTimestamp(Instant timestamp) {
+        this.timestamp = timestamp;
+    }
 
-	public Alert() {
-		super();
-		// TODO Auto-generated constructor stub
-	}
-    
-    
-    
-	
+    public void setResolved(boolean resolved) {
+        this.resolved = resolved;
+    }
 }
