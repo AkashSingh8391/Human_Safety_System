@@ -27,7 +27,8 @@ public class AuthController {
         userRepo.save(u);
         return "Registered";
     }
-
+    
+    
     @PostMapping("/login")
     public AuthResponse login(@RequestBody AuthRequest req) throws Exception {
         try {
@@ -35,8 +36,19 @@ public class AuthController {
         } catch (BadCredentialsException ex) {
             throw new Exception("Invalid Credentials");
         }
-        User u = userRepo.findByUsername(req.getUsername()).get();
+
+        User u = userRepo.findByUsername(req.getUsername())
+                         .orElseThrow(() -> new Exception("User not found"));
+
+        // If frontend sends role with login, validate it against DB (prevent wrong-role login)
+        if (req.getRole() != null && !u.getRole().equalsIgnoreCase(req.getRole())) {
+            throw new Exception("Role mismatch: user is " + u.getRole());
+        }
+
         String token = jwtUtil.generateToken(u.getUsername(), u.getRole());
         return new AuthResponse(token);
     }
+
+
+   
 }
