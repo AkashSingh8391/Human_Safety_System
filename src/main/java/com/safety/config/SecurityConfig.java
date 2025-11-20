@@ -67,9 +67,10 @@ public class SecurityConfig {
             }))
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // Modern lambda syntax
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/auth/**").permitAll()
-                .anyRequest().authenticated()
-            );
+            	    .requestMatchers("/api/auth/**", "/ws/**", "/app/**").permitAll()
+            	    .anyRequest().authenticated()
+            	);
+
 
         http.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
