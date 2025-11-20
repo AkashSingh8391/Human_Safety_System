@@ -3,6 +3,7 @@ package com.safety.controller;
 import com.safety.model.Alert;
 import com.safety.repository.AlertRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.Instant;
@@ -16,12 +17,23 @@ public class AlertController {
     @Autowired
     private AlertRepository alertRepo;
 
+    @Autowired
+    private SimpMessagingTemplate messagingTemplate;
+
     // Civil sends SOS
     @PostMapping("/sos")
     public Alert sendSos(@RequestBody Alert alert) {
         alert.setTimestamp(Instant.now());
         alert.setResolved(false);
-        return alertRepo.save(alert);
+        Alert saved = alertRepo.save(alert);
+
+        // broadcast new active alert to police clients
+        messagingTemplate.convertAndSend("/topic/alerts", saved);
+
+        // also send specific alert channel for trackers
+        messagingTemplate.convertAndSend("/topic/alert/" + saved.getAlertId(), saved);
+
+        return saved;
     }
 
     // Police gets all active alerts
@@ -43,6 +55,9 @@ public class AlertController {
             Alert a = opt.get();
             a.setResolved(true);
             alertRepo.save(a);
+            // notify removal or resolved state
+            messagingTemplate.convertAndSend("/topic/alerts", a);
+            messagingTemplate.convertAndSend("/topic/alert/" + id, a);
             return "Resolved";
         } else return "NotFound";
     }
@@ -54,6 +69,14 @@ public class AlertController {
         a.setLatitude(partial.getLatitude());
         a.setLongitude(partial.getLongitude());
         a.setTimestamp(Instant.now());
-        return alertRepo.save(a);
+        Alert saved = alertRepo.save(a);
+
+        // broadcast updated coordinates to listeners
+        messagingTemplate.convertAndSend("/topic/alert/" + alertId, saved);
+
+        // optionally broadcast to general alerts topic
+        messagingTemplate.convertAndSend("/topic/alerts", saved);
+
+        return saved;
     }
 }
