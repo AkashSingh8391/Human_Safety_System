@@ -7,36 +7,53 @@ import jakarta.persistence.*;
 public class User {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long userId;
-
-    @Column(unique = true)
-    private String username;
-
+    @Column(unique = true) private String username;
     private String password;
-    private String role; // "CIVIL"
-    private String phoneNo;
-    private String email;
+    private String emergencyEmail;
+    private String emergencyPhone;
 
     public User() {}
+    // getters + setters omitted for brevity - include all standard getters/setters
 
-    public User(Long userId, String username, String password, String role, String phoneNo, String email) {
-        this.userId = userId;
-        this.username = username;
-        this.password = password;
-        this.role = role;
-        this.phoneNo = phoneNo;
-        this.email = email;
-    }
+	public Long getUserId() {
+		return userId;
+	}
 
-    public Long getUserId() { return userId; }
-    public void setUserId(Long userId) { this.userId = userId; }
-    public String getUsername() { return username; }
-    public void setUsername(String username) { this.username = username; }
-    public String getPassword() { return password; }
-    public void setPassword(String password) { this.password = password; }
-    public String getRole() { return role; }
-    public void setRole(String role) { this.role = role; }
-    public String getPhoneNo() { return phoneNo; }
-    public void setPhoneNo(String phoneNo) { this.phoneNo = phoneNo; }
-    public String getEmail() { return email; }
-    public void setEmail(String email) { this.email = email; }
+	public void setUserId(Long userId) {
+		this.userId = userId;
+	}
+
+	public String getUsername() {
+		return username;
+	}
+
+	public void setUsername(String username) {
+		this.username = username;
+	}
+
+	public String getPassword() {
+		return password;
+	}
+
+	public void setPassword(String password) {
+		this.password = password;
+	}
+
+	public String getEmergencyEmail() {
+		return emergencyEmail;
+	}
+
+	public void setEmergencyEmail(String emergencyEmail) {
+		this.emergencyEmail = emergencyEmail;
+	}
+
+	public String getEmergencyPhone() {
+		return emergencyPhone;
+	}
+
+	public void setEmergencyPhone(String emergencyPhone) {
+		this.emergencyPhone = emergencyPhone;
+	}
+    
+    
 }

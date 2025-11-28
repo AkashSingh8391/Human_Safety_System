@@ -54,6 +54,7 @@ public class SecurityConfig {
                 c.setAllowCredentials(true);
                 return c;
             }))
+
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/auth/**", "/api/alert/**").permitAll() // allow for demo; tighten in prod
