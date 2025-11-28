@@ -1,6 +1,7 @@
 package com.safety.controller;
 
-import com.safety.dto.*;
+import com.safety.dto.AuthRequest;
+import com.safety.dto.AuthResponse;
 import com.safety.model.User;
 import com.safety.repository.UserRepository;
 import com.safety.service.JwtUtil;
@@ -8,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.*;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+
 
 @RestController
 @RequestMapping("/api/auth")
@@ -23,12 +25,13 @@ public class AuthController {
         User u = new User();
         u.setUsername(req.getUsername());
         u.setPassword(passwordEncoder.encode(req.getPassword()));
-        u.setRole(req.getRole() == null ? "CIVIL" : req.getRole().toUpperCase());
+        u.setRole("CIVIL");
+        u.setPhoneNo(req.getPhoneNo());
+        u.setEmail(req.getEmail());
         userRepo.save(u);
         return "Registered";
     }
-    
-    
+
     @PostMapping("/login")
     public AuthResponse login(@RequestBody AuthRequest req) throws Exception {
         try {
@@ -37,18 +40,8 @@ public class AuthController {
             throw new Exception("Invalid Credentials");
         }
 
-        User u = userRepo.findByUsername(req.getUsername())
-                         .orElseThrow(() -> new Exception("User not found"));
-
-        // If frontend sends role with login, validate it against DB (prevent wrong-role login)
-        if (req.getRole() != null && !u.getRole().equalsIgnoreCase(req.getRole())) {
-            throw new Exception("Role mismatch: user is " + u.getRole());
-        }
-
+        User u = userRepo.findByUsername(req.getUsername()).orElseThrow(() -> new Exception("User not found"));
         String token = jwtUtil.generateToken(u.getUsername(), u.getRole());
         return new AuthResponse(token);
     }
-
-
-   
 }
