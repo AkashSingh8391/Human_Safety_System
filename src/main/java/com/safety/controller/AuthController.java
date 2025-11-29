@@ -7,16 +7,16 @@ import com.safety.repository.UserRepository;
 import com.safety.service.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.*;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
-
 
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
+
     @Autowired private AuthenticationManager authManager;
     @Autowired private UserRepository userRepo;
-    @Autowired private BCryptPasswordEncoder passwordEncoder;
+    @Autowired private PasswordEncoder passwordEncoder;
     @Autowired private JwtUtil jwtUtil;
 
     @PostMapping("/register")
@@ -25,9 +25,8 @@ public class AuthController {
         User u = new User();
         u.setUsername(req.getUsername());
         u.setPassword(passwordEncoder.encode(req.getPassword()));
-        u.setRole("CIVIL");
-        u.setPhoneNo(req.getPhoneNo());
-        u.setEmail(req.getEmail());
+        u.setEmergencyEmail(req.getEmergencyEmail());
+        u.setEmergencyPhone(req.getEmergencyPhone());
         userRepo.save(u);
         return "Registered";
     }
@@ -39,9 +38,7 @@ public class AuthController {
         } catch (BadCredentialsException ex) {
             throw new Exception("Invalid Credentials");
         }
-
-        User u = userRepo.findByUsername(req.getUsername()).orElseThrow(() -> new Exception("User not found"));
-        String token = jwtUtil.generateToken(u.getUsername(), u.getRole());
+        String token = jwtUtil.generateToken(req.getUsername());
         return new AuthResponse(token);
     }
 }
