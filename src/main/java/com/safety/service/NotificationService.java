@@ -1,38 +1,60 @@
 package com.safety.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 import com.twilio.Twilio;
 import com.twilio.rest.api.v2010.account.Message;
-import org.springframework.beans.factory.annotation.Value;
 
 @Service
 public class NotificationService {
 
-    @Autowired private JavaMailSender mailSender;
+    @Autowired
+    private JavaMailSender mailSender;
 
-    @Value("${twilio.accountSid}") private String twilioSid;
-    @Value("${twilio.authToken}") private String twilioToken;
-    @Value("${twilio.fromNumber}") private String twilioFrom;
+    @Value("${spring.mail.from}")
+    private String fromEmail;
 
-    // send email
+    @Value("${twilio.accountSid}")
+    private String twilioSid;
+
+    @Value("${twilio.authToken}")
+    private String twilioToken;
+
+    @Value("${twilio.fromNumber}")
+    private String twilioFrom;
+
+    // SEND EMAIL
     public void sendEmail(String to, String subject, String body) {
-        SimpleMailMessage msg = new SimpleMailMessage();
-        msg.setTo(to);
-        msg.setSubject(subject);
-        msg.setText(body);
-        mailSender.send(msg);
+        try {
+            SimpleMailMessage msg = new SimpleMailMessage();
+            msg.setFrom(fromEmail);  // FIXED
+            msg.setTo(to);
+            msg.setSubject(subject);
+            msg.setText(body);
+
+            mailSender.send(msg);
+            System.out.println("EMAIL SENT TO: " + to);
+
+        } catch (Exception e) {
+            System.out.println("EMAIL ERROR: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
-    // send SMS via Twilio
+    // SEND SMS
     public void sendSms(String to, String messageBody) {
         try {
             Twilio.init(twilioSid, twilioToken);
-            Message.creator(new com.twilio.type.PhoneNumber(to),
+            Message.creator(
+                    new com.twilio.type.PhoneNumber(to),
                     new com.twilio.type.PhoneNumber(twilioFrom),
-                    messageBody).create();
+                    messageBody
+            ).create();
+            System.out.println("SMS SENT TO: " + to);
+
         } catch (Exception e) {
             System.err.println("SMS error: " + e.getMessage());
         }
