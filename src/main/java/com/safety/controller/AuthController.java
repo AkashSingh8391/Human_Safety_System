@@ -41,4 +41,12 @@ public class AuthController {
         String token = jwtUtil.generateToken(req.getUsername());
         return new AuthResponse(token);
     }
+    
+    @GetMapping("/me")
+    public User me(@RequestHeader("Authorization") String auth) {
+        String token = auth.substring(7);
+        String username = jwtUtil.extractUsername(token);
+        return userRepo.findByUsername(username).orElseThrow();
+    }
+
 }

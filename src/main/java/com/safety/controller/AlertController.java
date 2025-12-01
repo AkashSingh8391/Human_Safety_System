@@ -1,7 +1,6 @@
 package com.safety.controller;
 
 import com.safety.model.Alert;
-import com.safety.model.User;
 import com.safety.repository.AlertRepository;
 import com.safety.repository.UserRepository;
 import com.safety.service.NotificationService;
@@ -24,21 +23,47 @@ public class AlertController {
     // create SOS (civil will call)
     @PostMapping("/sos")
     public Alert sendSos(@RequestBody Alert alert) {
+
+        System.out.println("\n========================");
+        System.out.println("🔔 SOS RECEIVED");
+        System.out.println("userId sent = " + alert.getUserId());
+        System.out.println("message = " + alert.getMessage());
+        System.out.println("lat = " + alert.getLatitude());
+        System.out.println("lng = " + alert.getLongitude());
+        System.out.println("========================\n");
+
         alert.setTimestamp(Instant.now());
         alert.setResolved(false);
         Alert saved = alertRepo.save(alert);
 
-        // Broadcast via WebSocket for live tracking
+        // Broadcast
         messagingTemplate.convertAndSend("/topic/alerts", saved);
         messagingTemplate.convertAndSend("/topic/alert/" + saved.getAlertId(), saved);
 
-        // Send Email + SMS to user's saved emergency contact
-        userRepo.findById(alert.getUserId()).ifPresent(user -> {
-            String mapsUrl = "https://www.google.com/maps?q=" + alert.getLatitude() + "," + alert.getLongitude();
-            String mailBody = "SOS ALERT!\n\nMessage: " + alert.getMessage() + "\nLocation: " + mapsUrl + "\nTime: " + saved.getTimestamp();
-            try { notif.sendEmail(user.getEmergencyEmail(), "SOS Alert — Your Contact", mailBody); } catch (Exception e) { e.printStackTrace(); }
+        System.out.println("🔍 Finding user inside DB...");
 
-            try { notif.sendSms(user.getEmergencyPhone(), "SOS! " + alert.getMessage() + " Location: " + mapsUrl); } catch (Exception e) { e.printStackTrace(); }
+        userRepo.findById(alert.getUserId()).ifPresentOrElse(user -> {
+
+            System.out.println("✔ USER FOUND: " + user.getUsername());
+            System.out.println("✔ Emergency Email: " + user.getEmergencyEmail());
+            System.out.println("✔ Emergency Phone: " + user.getEmergencyPhone());
+
+            String mapsUrl = "https://www.google.com/maps?q=" + alert.getLatitude() + "," + alert.getLongitude();
+            String mailBody = "SOS ALERT!\n\nMessage: " + alert.getMessage() +
+                    "\nLocation: " + mapsUrl +
+                    "\nTime: " + saved.getTimestamp();
+
+            try {
+                System.out.println("📧 Sending SOS email to " + user.getEmergencyEmail());
+                notif.sendEmail(user.getEmergencyEmail(), "SOS Alert — Your Contact", mailBody);
+                System.out.println("📧 Email send attempted!");
+            } catch (Exception e) {
+                System.out.println("❌ Email failed: " + e.getMessage());
+                e.printStackTrace();
+            }
+
+        }, () -> {
+            System.out.println("❌ USER NOT FOUND IN DB for userId = " + alert.getUserId());
         });
 
         return saved;
