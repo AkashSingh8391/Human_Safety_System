@@ -10,13 +10,19 @@ import java.util.Collections;
 
 @Service
 public class MyUserDetailsService implements UserDetailsService {
-    @Autowired private UserRepository userRepo;
+
+    @Autowired private UserRepository repo;
+
     @Override
-    public UserDetails loadUserByUsername(String usernameOrEmail) throws UsernameNotFoundException {
-        // we treat username parameter as email now
-        User u = userRepo.findByEmail(usernameOrEmail)
+    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+
+        User user = repo.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
-        return new org.springframework.security.core.userdetails.User(u.getEmail(), u.getPassword(),
-                Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER")));
+
+        return new org.springframework.security.core.userdetails.User(
+                user.getEmail(),
+                user.getPassword(),
+                Collections.singleton(new SimpleGrantedAuthority("ROLE_USER"))
+        );
     }
 }
