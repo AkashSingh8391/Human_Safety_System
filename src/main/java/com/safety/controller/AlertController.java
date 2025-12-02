@@ -1,7 +1,9 @@
 package com.safety.controller;
 
 import com.safety.model.Alert;
+import com.safety.model.EmergencyContact;
 import com.safety.repository.AlertRepository;
+import com.safety.repository.EmergencyContactRepository;
 import com.safety.repository.UserRepository;
 import com.safety.service.NotificationService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,59 +19,49 @@ public class AlertController {
 
     @Autowired private AlertRepository alertRepo;
     @Autowired private UserRepository userRepo;
+    @Autowired private EmergencyContactRepository contactRepo;
     @Autowired private NotificationService notif;
     @Autowired private SimpMessagingTemplate messagingTemplate;
 
-    // create SOS (civil will call)
     @PostMapping("/sos")
     public Alert sendSos(@RequestBody Alert alert) {
-
-        System.out.println("\n========================");
-        System.out.println("🔔 SOS RECEIVED");
-        System.out.println("userId sent = " + alert.getUserId());
-        System.out.println("message = " + alert.getMessage());
-        System.out.println("lat = " + alert.getLatitude());
-        System.out.println("lng = " + alert.getLongitude());
-        System.out.println("========================\n");
-
+        System.out.println("SOS RECEIVED userId=" + alert.getUserId());
         alert.setTimestamp(Instant.now());
         alert.setResolved(false);
         Alert saved = alertRepo.save(alert);
 
-        // Broadcast
+        // Broadcast for live tracking
         messagingTemplate.convertAndSend("/topic/alerts", saved);
         messagingTemplate.convertAndSend("/topic/alert/" + saved.getAlertId(), saved);
 
-        System.out.println("🔍 Finding user inside DB...");
+        // Build maps/link once
+        String mapsUrl = "http://localhost:5173/track?lat=" + alert.getLatitude() + "&lng=" + alert.getLongitude();
+        String mailBody = "SOS ALERT!\n\nMessage: " + alert.getMessage()
+                + "\nLocation: " + mapsUrl + "\nTime: " + saved.getTimestamp();
 
-        userRepo.findById(alert.getUserId()).ifPresentOrElse(user -> {
-
-            System.out.println("✔ USER FOUND: " + user.getUsername());
-            System.out.println("✔ Emergency Email: " + user.getEmergencyEmail());
-            System.out.println("✔ Emergency Phone: " + user.getEmergencyPhone());
-
-            String mapsUrl = "https://www.google.com/maps?q=" + alert.getLatitude() + "," + alert.getLongitude();
-            String mailBody = "SOS ALERT!\n\nMessage: " + alert.getMessage() +
-                    "\nLocation: " + mapsUrl +
-                    "\nTime: " + saved.getTimestamp();
-
-            try {
-                System.out.println("📧 Sending SOS email to " + user.getEmergencyEmail());
-                notif.sendEmail(user.getEmergencyEmail(), "SOS Alert — Your Contact", mailBody);
-                System.out.println("📧 Email send attempted!");
-            } catch (Exception e) {
-                System.out.println("❌ Email failed: " + e.getMessage());
-                e.printStackTrace();
+        // fetch all emergency contacts for this user
+        List<EmergencyContact> contacts = contactRepo.findByUserId(alert.getUserId());
+        for (EmergencyContact c : contacts) {
+            if (c.getEmail() != null && !c.getEmail().isBlank()) {
+                try {
+                    notif.sendEmail(c.getEmail(), "SOS Alert — Emergency Contact", mailBody);
+                    System.out.println("Email sent to: " + c.getEmail());
+                } catch (Exception e) {
+                    System.err.println("Email error for " + c.getEmail() + " : " + e.getMessage());
+                }
             }
-
-        }, () -> {
-            System.out.println("❌ USER NOT FOUND IN DB for userId = " + alert.getUserId());
-        });
-
+            if (c.getPhone() != null && !c.getPhone().isBlank()) {
+                try {
+                    notif.sendSms(c.getPhone(), "SOS! " + alert.getMessage() + " Location: " + mapsUrl);
+                    System.out.println("SMS sent to: " + c.getPhone());
+                } catch (Exception e) {
+                    System.err.println("SMS error for " + c.getPhone() + " : " + e.getMessage());
+                }
+            }
+        }
         return saved;
     }
 
-    // update location for an alert (civil client will call)
     @PostMapping("/update/{alertId}")
     public Alert updateLocation(@PathVariable Long alertId, @RequestBody Alert partial) {
         Alert a = alertRepo.findById(alertId).orElseThrow();
