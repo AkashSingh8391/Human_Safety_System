@@ -4,15 +4,12 @@ import com.safety.model.EmergencyContact;
 import com.safety.repository.EmergencyContactRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/contact")
 public class EmergencyContactController {
-
-    @Autowired
-    private EmergencyContactRepository contactRepo;
+    @Autowired private EmergencyContactRepository contactRepo;
 
     @PostMapping("/add")
     public EmergencyContact addContact(@RequestBody EmergencyContact contact) {
