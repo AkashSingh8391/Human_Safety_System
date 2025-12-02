@@ -8,19 +8,17 @@ public class EmergencyContact {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private Long userId;    // owner userId
-    private String email;   // emergency email (nullable)
-    private String phone;   // emergency phone (nullable)
+    private Long userId;
+    private String email;
+    private String phone;
 
     public EmergencyContact() {}
-
     public EmergencyContact(Long userId, String email, String phone) {
         this.userId = userId;
         this.email = email;
         this.phone = phone;
     }
 
-    // getters & setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 

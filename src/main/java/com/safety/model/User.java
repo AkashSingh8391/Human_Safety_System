@@ -2,6 +2,7 @@ package com.safety.model;
 
 import jakarta.persistence.*;
 
+
 @Entity
 @Table(name = "users")
 public class User {
@@ -9,13 +10,12 @@ public class User {
     private Long userId;
 
     @Column(unique = true)
-    private String email;   // login email
+    private String email;
 
     private String password;
 
     public User() {}
 
-    // getters & setters
     public Long getUserId() { return userId; }
     public void setUserId(Long userId) { this.userId = userId; }
 
