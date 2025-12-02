@@ -10,15 +10,12 @@ import java.util.Collections;
 
 @Service
 public class MyUserDetailsService implements UserDetailsService {
-
     @Autowired private UserRepository repo;
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-
         User user = repo.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
-
         return new org.springframework.security.core.userdetails.User(
                 user.getEmail(),
                 user.getPassword(),
