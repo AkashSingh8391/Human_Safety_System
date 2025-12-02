@@ -1,4 +1,5 @@
 package com.safety.config;
+
 import com.safety.service.JwtUtil;
 import com.safety.service.MyUserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,14 +23,14 @@ public class JwtFilter extends OncePerRequestFilter {
         if (path.startsWith("/api/auth") || path.startsWith("/ws")) { chain.doFilter(req, res); return; }
 
         final String authHeader = req.getHeader("Authorization");
-        String token = null, username = null;
+        String token = null, subject = null;
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             token = authHeader.substring(7);
-            try { username = jwtUtil.extractUsername(token); } catch (Exception e) {}
+            try { subject = jwtUtil.extractUsername(token); } catch (Exception e) {}
         }
 
-        if (username != null && SecurityContextHolder.getContext().getAuthentication() == null && jwtUtil.validateToken(token)) {
-            var userDetails = userDetailsService.loadUserByUsername(username);
+        if (subject != null && SecurityContextHolder.getContext().getAuthentication() == null && jwtUtil.validateToken(token)) {
+            var userDetails = userDetailsService.loadUserByUsername(subject);
             UsernamePasswordAuthenticationToken upa = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
             upa.setDetails(new WebAuthenticationDetailsSource().buildDetails(req));
             SecurityContextHolder.getContext().setAuthentication(upa);

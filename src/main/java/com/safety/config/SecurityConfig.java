@@ -1,4 +1,5 @@
 package com.safety.config;
+
 import com.safety.service.MyUserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -48,7 +49,6 @@ public class SecurityConfig {
             .sessionManagement(s-> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(a -> a
                 .requestMatchers("/api/auth/**", "/api/alert/**", "/api/test/**", "/ws/**", "/app/**").permitAll()
-
                 .anyRequest().authenticated()
             );
 
