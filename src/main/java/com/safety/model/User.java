@@ -1,21 +1,25 @@
 package com.safety.model;
 
 import jakarta.persistence.*;
+import java.util.List;
 
 @Entity
 @Table(name = "users")
 public class User {
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+
+    @Id 
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long userId;
 
     @Column(unique = true)
-    private String email;   // login email
+    private String email;
 
     private String password;
 
-    public User() {}
+    // List of emergency contacts (email or phone)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<EmergencyContact> contacts;
 
-    // getters & setters
     public Long getUserId() { return userId; }
     public void setUserId(Long userId) { this.userId = userId; }
 
@@ -24,4 +28,7 @@ public class User {
 
     public String getPassword() { return password; }
     public void setPassword(String password) { this.password = password; }
+
+    public List<EmergencyContact> getContacts() { return contacts; }
+    public void setContacts(List<EmergencyContact> contacts) { this.contacts = contacts; }
 }
