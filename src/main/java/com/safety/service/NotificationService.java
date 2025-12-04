@@ -21,7 +21,7 @@ public class NotificationService {
     public void sendEmail(String to, String subject, String body) {
         try {
             SimpleMailMessage msg = new SimpleMailMessage();
-            msg.setFrom(fromEmail);
+            if (fromEmail != null && !fromEmail.isBlank()) msg.setFrom(fromEmail);
             msg.setTo(to);
             msg.setSubject(subject);
             msg.setText(body);
