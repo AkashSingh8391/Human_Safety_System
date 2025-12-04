@@ -20,7 +20,12 @@ public class JwtFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest req, HttpServletResponse res, FilterChain chain) throws ServletException, IOException {
         String path = req.getServletPath();
-        if (path.startsWith("/api/auth") || path.startsWith("/ws")) { chain.doFilter(req, res); return; }
+
+        // allow public login/register and websocket handshake without JWT
+        if (path.equals("/api/auth/login") || path.equals("/api/auth/register") || path.startsWith("/ws")) {
+            chain.doFilter(req, res);
+            return;
+        }
 
         final String authHeader = req.getHeader("Authorization");
         String token = null, subject = null;

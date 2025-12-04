@@ -37,24 +37,24 @@ public class SecurityConfig {
 
     @Bean
     SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http.csrf(csrf -> csrf.disable())
-            .cors(cors -> cors.configurationSource(request -> {
+        http.csrf(csrf->csrf.disable())
+            .cors(cors-> cors.configurationSource(request -> {
                 CorsConfiguration c = new CorsConfiguration();
-                c.setAllowedOrigins(List.of("http://localhost:5174"));
-                c.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+                c.setAllowedOrigins(List.of(allowedOrigin)); // single origin from properties
+                c.setAllowedMethods(List.of("GET","POST","PUT","DELETE","OPTIONS"));
                 c.setAllowedHeaders(List.of("*"));
                 c.setAllowCredentials(true);
                 return c;
             }))
-            .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .sessionManagement(s-> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(a -> a
-                    .requestMatchers("/api/auth/**").permitAll()
-                    .requestMatchers("/ws/**", "/app/**").permitAll()
-                    .anyRequest().authenticated()
+                // permit only login/register and ws handshake
+                .requestMatchers("/api/auth/login", "/api/auth/register", "/ws/**", "/app/**").permitAll()
+                // other endpoints require authentication
+                .anyRequest().authenticated()
             );
 
         http.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
-
 }
