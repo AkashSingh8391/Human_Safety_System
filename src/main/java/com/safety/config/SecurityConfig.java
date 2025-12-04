@@ -16,16 +16,22 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
+
 import java.util.List;
 
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
 public class SecurityConfig {
-    @Autowired private JwtFilter jwtFilter;
-    @Value("${app.cors.allowed}") private String allowedOrigin;
 
-    @Bean public PasswordEncoder passwordEncoder(){ return new BCryptPasswordEncoder(); }
+    @Autowired
+    private JwtFilter jwtFilter;
+
+    @Value("${app.cors.allowed}")
+    private String allowedOrigin;
+
+    @Bean
+    public PasswordEncoder passwordEncoder(){ return new BCryptPasswordEncoder(); }
 
     @Bean
     public AuthenticationManager authenticationManager(MyUserDetailsService uds){
@@ -36,22 +42,25 @@ public class SecurityConfig {
     }
 
     @Bean
-    SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http.csrf(csrf->csrf.disable())
-            .cors(cors-> cors.configurationSource(request -> {
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+
+        http.csrf(cs -> cs.disable())
+            .cors(cors -> cors.configurationSource(request -> {
                 CorsConfiguration c = new CorsConfiguration();
-                c.setAllowedOrigins(List.of(allowedOrigin)); // single origin from properties
+                c.setAllowedOrigins(List.of(allowedOrigin));
                 c.setAllowedMethods(List.of("GET","POST","PUT","DELETE","OPTIONS"));
                 c.setAllowedHeaders(List.of("*"));
                 c.setAllowCredentials(true);
                 return c;
             }))
-            .sessionManagement(s-> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .authorizeHttpRequests(a -> a
-                // permit only login/register and ws handshake
-                .requestMatchers("/api/auth/login", "/api/auth/register", "/ws/**", "/app/**").permitAll()
-                // other endpoints require authentication
-                .anyRequest().authenticated()
+            .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .authorizeHttpRequests(auth -> auth
+                    // LOGIN + REGISTER ALWAYS PUBLIC
+                    .requestMatchers("/api/auth/login", "/api/auth/register").permitAll()
+                    // WebSocket public
+                    .requestMatchers("/ws/**", "/app/**").permitAll()
+                    // Everything else must be authenticated
+                    .anyRequest().authenticated()
             );
 
         http.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);

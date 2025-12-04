@@ -2,44 +2,58 @@ package com.safety.config;
 
 import com.safety.service.JwtUtil;
 import com.safety.service.MyUserDetailsService;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
-import jakarta.servlet.*;
-import jakarta.servlet.http.*;
 import java.io.IOException;
 
 @Component
 public class JwtFilter extends OncePerRequestFilter {
+
     @Autowired private JwtUtil jwtUtil;
     @Autowired private MyUserDetailsService userDetailsService;
 
     @Override
-    protected void doFilterInternal(HttpServletRequest req, HttpServletResponse res, FilterChain chain) throws ServletException, IOException {
+    protected void doFilterInternal(HttpServletRequest req, HttpServletResponse res, FilterChain chain)
+            throws ServletException, IOException {
+
         String path = req.getServletPath();
 
-        // allow public login/register and websocket handshake without JWT
+        // LOGIN + REGISTER MUST NOT REQUIRE JWT
         if (path.equals("/api/auth/login") || path.equals("/api/auth/register") || path.startsWith("/ws")) {
             chain.doFilter(req, res);
             return;
         }
 
-        final String authHeader = req.getHeader("Authorization");
-        String token = null, subject = null;
-        if (authHeader != null && authHeader.startsWith("Bearer ")) {
-            token = authHeader.substring(7);
-            try { subject = jwtUtil.extractUsername(token); } catch (Exception e) {}
+        String header = req.getHeader("Authorization");
+        String token = null;
+        String email = null;
+
+        if (header != null && header.startsWith("Bearer ")) {
+            token = header.substring(7);
+            try {
+                email = jwtUtil.extractUsername(token);
+            } catch (Exception ignored) {}
         }
 
-        if (subject != null && SecurityContextHolder.getContext().getAuthentication() == null && jwtUtil.validateToken(token)) {
-            var userDetails = userDetailsService.loadUserByUsername(subject);
-            UsernamePasswordAuthenticationToken upa = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-            upa.setDetails(new WebAuthenticationDetailsSource().buildDetails(req));
-            SecurityContextHolder.getContext().setAuthentication(upa);
+        if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+            var userDetails = userDetailsService.loadUserByUsername(email);
+
+            if (jwtUtil.validateToken(token)) {
+                UsernamePasswordAuthenticationToken auth =
+                        new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+
+                auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(req));
+                SecurityContextHolder.getContext().setAuthentication(auth);
+            }
         }
+
         chain.doFilter(req, res);
     }
 }
