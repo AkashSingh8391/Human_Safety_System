@@ -45,4 +45,5 @@ public class AuthController {
         String email = jwtUtil.extractUsername(token);
         return userRepo.findByEmail(email).orElseThrow();
     }
+
 }
