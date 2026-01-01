@@ -1,145 +1,61 @@
-# Human_Safety_System
+🚨 Human Safety System
 
-┌────────────────────────────────────────┐
-               │         SPRING BOOT BACKEND             │
-               │ JWT + MySQL + WebSocket + REST APIs     │
-               └──────────────────┬──────────────────────┘
-                                  │
-          ┌───────────────────────┼────────────────────────┐
-          │                                                │
- ┌──────────────────────┐                      ┌───────────────────────┐
- │ Flutter Mobile App   │                      │ React Web Dashboard   │
- │ (Civil + Police)     │                      │ (Police + Admin)      │
- │ - SOS trigger         │                      │ - Active alerts view  │
- │ - Live location map   │                      │ - Live tracking map   │
- │ - JWT Auth            │                      │ - JWT Auth            │
- │ - Firebase optional   │                      │ - WebSocket updates   │
- └──────────────────────┘                      └───────────────────────┘
+A role-based emergency response system for real-time SOS alerts and live location tracking.
 
-Project Title
-Human Safety System with Dual Profile (Civil & Police), Real-Time SOS Alert, and Live Tracking using Spring Boot, Flutter, and MySQL.
+Designed to help victim users quickly request help and enable Family users to respond efficiently.
 
-Objective
-Ek aisa integrated safety platform banana jisme civil user emergency time par apni live location ke sath alert message bhej sake aur nearby police real-time unki help ke liye location par trace kar sake.​
+🎯 Objective
 
-Technologies Used
-Backend: Java Spring Boot (REST APIs, Security, JPA, MySQL)
+Enable one-click SOS alerts during emergencies
 
-Frontend: Flutter (cross-platform mobile app)
+Share live GPS location securely
 
-Database: MySQL (user, location & alert details storage)
+Allow police/family to monitor and track alerts in real time
 
-API Integration: Google Maps API for live tracking and path tracing
+🧑‍🤝‍🧑 User Roles
 
-Authentication: Spring Security with JWT
+Victim User
 
-Notification System: Optional Firebase Cloud Messaging or local alerts
+Register & login
 
-System Architecture
-Actors:
+Send SOS alert with live location
 
-Civil User (mobile app se SOS trigger karne wala)
+Family User
 
-Police Officer (alerts monitor karta hai aur live route dekhta hai)
+Secure login
 
-Modules:
+View active alerts
 
-Dual Login Portal (Civil / Police)
+Track locations on Google Maps
 
-SOS Alert Trigger System
+🛠️ Tech Stack
 
-Live Location & Path Tracking via Google Maps
+Backend: Spring Boot, Spring Security, JWT, JPA, MySQL
 
-Admin Police Dashboard
+Frontend: React.js, Axios, React Router
 
-Notification & Alert Management
+Maps: Leaflet Api for free and simple map integration
 
-Database Management System (MySQL)
+Tools: Postman, MySQL Workbench
 
-Data Flow:
+🔐 Security
 
-Civil user logs in and sends SOS alert →
+JWT-based authentication
 
-Spring Boot backend receives the location details →
+Role-based access control
 
-Alert details MySQL DB me save hota hai →
+Secured REST APIs
 
-Police app user ko real-time alert milta hai →
+✨ Key Features
 
-Police dashboard par live Google Maps path dikhta hai with user movement.​
+Real-time SOS alerts
 
-Backend Overview (Spring Boot)
-Key Components:
+Live location tracking
 
-AuthController.java → JWT Login & Signup
+Role-based dashboards
 
-AlertController.java → SOS submission, list & resolve APIs
+Google Maps integration
 
-UserController.java → User info operations
+📝 Summary
 
-User.java, Alert.java → Entity models
-
-UserRepository.java, AlertRepository.java → JPA repositories
-
-Database config in application.properties (MySQL integration)
-
-Main Endpoints:
-
-POST /api/auth/login — Login (Civil/Police)
-
-POST /api/auth/register — Register new user
-
-POST /api/alert/sos — Send SOS alert
-
-GET /api/alert/police — Get all active alerts
-
-PUT /api/alert/resolve/{id} — Resolve alert
-
-Frontend Overview (Flutter)
-App Structure:
-
-text
-/lib
-  main.dart
-  /screens
-    login_screen.dart
-    civil_home_screen.dart
-    police_home_screen.dart
-    sos_alert_screen.dart
-    live_location_screen.dart
-  /services
-    api_service.dart
-  /models
-    user.dart
-    alert.dart
-Core Features:
-
-Civil dashboard → SOS Alert Button + Live Location Tracking
-
-Police dashboard → Active SOS List + User Movement Map
-
-Real-time tracking with moving marker & route drawn using google_maps_flutter and location package.​​
-
-Database Schema (MySQL)
-Tables:
-
-users — user_id, username, password, role, phone_no
-
-alerts — alert_id, user_id, message, latitude, longitude, timestamp, resolved
-
-Additional Capabilities
-Path trace using polyline points (draws user route on Google Map).​
-
-Location auto-refresh every few seconds.
-
-Role-based dashboards (civil/police access separation).​
-
-Optional Firebase integration for instant police notification.​
-
-Final Output
-Civil User App: Login → Send SOS → Map + Police Tracking
-
-Police App: Login → View Alerts → Live Map & Route Trace
-
-Backend Admin: Database stores logs & location updates securely
-
+A full-stack safety application demonstrating secure authentication, real-time communication, and map-based tracking for emergency response.
